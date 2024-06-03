@@ -17,8 +17,8 @@ import java.util.Random;
 
 public class Main {
     private static final int NUM_PARTICLES = 500;
-    private static final int WIDTH = 900;
-    private static final int HEIGHT = 900;
+    private static final int WIDTH = 800;
+    private static final int HEIGHT = 800;
     private static final float DELTA_TIME = 0.01f;
     private static final float GRAVITATIONAL_CONSTANT = 0.000000005f;
     private static final boolean printStatistics = true;
@@ -58,6 +58,11 @@ public class Main {
         cl_device_id[] devices = new cl_device_id[1];
         CL.clGetDeviceIDs(platform, deviceType, devices.length, devices, null);
         cl_device_id device = devices[deviceIndex];
+
+        String platformName = getStringInfo(platform, CL.CL_PLATFORM_NAME);
+        String deviceName = getStringInfo(device, CL.CL_DEVICE_NAME);
+        System.out.println("Platform: " + platformName);
+        System.out.println("Device: " + deviceName);
 
         cl_context context = CL.clCreateContext(
                 null, 1, new cl_device_id[]{device}, null, null, null);
@@ -150,11 +155,11 @@ public class Main {
             label.repaint();
 
             // Sleep to control the frame rate
-//            try {
-//                Thread.sleep(10);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -227,5 +232,23 @@ public class Main {
 //                e.printStackTrace();
 //            }
         }
+    }
+
+    // Some helper methods for displaying GPU info
+
+    private static String getStringInfo(cl_platform_id platform, int paramName) {
+        long[] size = new long[1];
+        CL.clGetPlatformInfo(platform, paramName, 0, null, size);
+        byte[] buffer = new byte[(int) size[0]];
+        CL.clGetPlatformInfo(platform, paramName, buffer.length, Pointer.to(buffer), null);
+        return new String(buffer, 0, buffer.length - 1);
+    }
+
+    private static String getStringInfo(cl_device_id device, int paramName) {
+        long[] size = new long[1];
+        CL.clGetDeviceInfo(device, paramName, 0, null, size);
+        byte[] buffer = new byte[(int) size[0]];
+        CL.clGetDeviceInfo(device, paramName, buffer.length, Pointer.to(buffer), null);
+        return new String(buffer, 0, buffer.length - 1);
     }
 }
